@@ -5,9 +5,14 @@ from cesk.cont import *
 Cesk = namedtuple('Cesk', ['control', 'env', 'cont'])
 
 def eval(control):
+    """Evaluates an expression.
+    """
     cesk = Cesk(control, default_env(), HaltCont())
-    while cesk is not None:
-        cesk = step(*cesk)
+    try:
+        while True:
+            cesk = step(*cesk)
+    except Halt:
+        pass
 
 
 def step(control, env, cont):
@@ -54,6 +59,8 @@ def step(control, env, cont):
 
 
 def eval_atomic(atomic, env):
+    """Evaluates an atomic expression.
+    """
 
     if isinstance(atomic, Lambda):
         return Closure(atomic, env)
@@ -69,17 +76,18 @@ def eval_atomic(atomic, env):
 
 
 def apply_func(func, args, cont):
+
     if isinstance(func, Closure):
         if len(func.lambda_.args) != len(args):
             raise TypeError(
                 '%s takes at exactly %s arguments (%s given)' %
                 (func.lambda_, len(func.lambda_.args), len(args)))
 
-        bindings = {}
-        for var, val in zip(func.lambda_.args, args):
-            bindings[var] = val
-        env = func.env.updated(bindings)
+        env = func.env.updated(dict(zip(func.lambda_.args, args)))
         return Cesk(func.lambda_.body, env, cont)
+
+    if isinstance(func, Cont):
+        return apply_cont(func, Cont)
 
     if hasattr(func, '__call__'):
         return apply_cont(cont, func(*args))
@@ -88,12 +96,13 @@ def apply_func(func, args, cont):
 
 
 def apply_cont(cont, val):
+
     if isinstance(cont, LetCont):
         env = cont.env.updated({cont.var: val})
         return Cesk(cont.body, env, cont.cont)
 
     if isinstance(cont, HaltCont):
-        return
+        raise Halt()
 
     assert(not isinstance(cont, Cont))
     raise ValueError('%s is not a continuation' % cont)
