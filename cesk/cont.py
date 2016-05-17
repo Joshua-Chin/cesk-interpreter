@@ -1,3 +1,5 @@
+"""This module contains the continuation objects used by the interpreter
+"""
 from collections import namedtuple
 
 __all__ = [
