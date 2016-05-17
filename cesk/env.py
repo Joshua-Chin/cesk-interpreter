@@ -1,6 +1,5 @@
 from collections import namedtuple
 from cesk.control import Variable
-from cesk.store import Cell
 
 class Env:
 
@@ -10,13 +9,32 @@ class Env:
 
     def __getitem__(self, key):
         if key in self.bindings:
-            return self.bindings[key]
-        if self.outer_scope is None:
+            return self.bindings[key].val
+        elif self.outer_scope is None:
             raise NameError('name %s is not defined' % key)
-        return self.outer_scope[key]
+        else:
+            return self.outer_scope[key]
+
+    def __setitem__(self, key, val):
+        if key in self.bindings:
+            self.bindings[key].val = val
+        elif self.outer_scope is None:
+            self.bindings[key] = Cell(val)
+        else:
+            self.outer_scope[key] = val
 
     def updated(self, bindings):
-        return Env(bindings, self)
+        return Env({key:Cell(val) for key, val in bindings.items()}, self)
+
+
+class Cell:
+
+    def __init__(self, val=None):
+        self.val = val
+
+    def __repr__(self):
+        return 'Cell(%s)' % self.val
+
 
 Closure = namedtuple('Closure', ['lambda_', 'env'])
 
