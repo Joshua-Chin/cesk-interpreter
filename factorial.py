@@ -13,7 +13,7 @@ Let(t4,
     LetRec(
         [(factorial,
             Lambda([t0],
-                Let(t1, Call(Variable('=='), [t0, 0]),
+                Let(t1, Call(Variable('equal?'), [t0, 0]),
                     If(t1,
                         1,
                         Let(t2, Call(Variable('-'), [t0, 1]),

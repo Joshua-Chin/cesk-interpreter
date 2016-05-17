@@ -1,10 +1,12 @@
 from collections import namedtuple
+from functools import reduce
+
 from cesk.control import Variable
 
 class Env:
 
     def __init__(self, bindings, outer_scope=None):
-        self.bindings = bindings
+        self.bindings = {key: Cell(val) for key, val in bindings.items()}
         self.outer_scope = outer_scope
 
     def __getitem__(self, key):
@@ -24,7 +26,7 @@ class Env:
             self.outer_scope[key] = val
 
     def updated(self, bindings):
-        return Env({key:Cell(val) for key, val in bindings.items()}, self)
+        return Env(bindings, self)
 
 
 class Cell:
@@ -42,12 +44,12 @@ Closure = namedtuple('Closure', ['lambda_', 'env'])
 def default_env():
     env = {
         'print': print,
-        'sum': sum,
-        '-': lambda x,y: x - y,
-        '>': lambda x,y: x > y,
-        '==': lambda x,y: x == y,
-        '*': lambda x,y: x*y,
+        '+': lambda *args: sum(args),
+        '-': lambda *args: args[0] - sum(args[1:]) if len(args) > 1 else -args[0],
+        '*': lambda *args: reduce(lambda x, y: x * y, args, 1),
+        '/': lambda *args: reduce(lambda x, y: x / y, args[1:], args[0]),
+        'eq?': lambda x, y: x is y,
+        'equal?': lambda x, y: x == y,
+
     }
-    return Env({
-        Variable(name): Cell(val) for name, val in env.items()
-    })
+    return Env({Variable(name): val for name, val in env.items()})
