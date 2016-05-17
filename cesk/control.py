@@ -1,3 +1,6 @@
+"""
+This module provides the control structures for cesk interpreter.
+"""
 from abc import ABC
 from collections import namedtuple
 
@@ -19,11 +22,12 @@ class Expr(ABC): pass
 class Atomic(Expr): pass
 class Lambda(Atomic, namedtuple('Lambda', ['args', 'body'])): pass
 class Variable(Atomic, namedtuple('Variable', ['name'])): pass
-Atomic.register(type(None))
-Atomic.register(int)
-Atomic.register(bool)
-Atomic.register(str)
-Atomic.register(list)
+class Literal(Atomic): pass
+Literal.register(type(None))
+Literal.register(int)
+Literal.register(bool)
+Literal.register(str)
+Literal.register(list)
 
 class Call(Expr, namedtuple('Call', ['func', 'args'])): pass
 class If(Expr, namedtuple('If', ['cond', 'true', 'false'])): pass
