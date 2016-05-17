@@ -12,6 +12,7 @@ def eval(control):
 
 
 def step(control, env, store, cont):
+
     if isinstance(control, Atomic):
         result = eval_atomic(control, env, store)
         return apply_cont(cont, result, store)
@@ -48,7 +49,7 @@ def step(control, env, store, cont):
 
     if isinstance(control, CallCC):
         func = eval_atomic(control.func, env, store)
-        return apply_func(func, [cont], env, store)
+        return apply_func(func, [cont], store, cont)
 
     assert(not isinstance(control, Expr))
     raise ValueError('%s is not an expression' % control)
