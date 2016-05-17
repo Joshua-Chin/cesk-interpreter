@@ -87,7 +87,7 @@ def apply_func(func, args, cont):
         return Cesk(func.lambda_.body, env, cont)
 
     if isinstance(func, Cont):
-        return apply_cont(func, Cont)
+        return apply_cont(func, *args)
 
     if hasattr(func, '__call__'):
         return apply_cont(cont, func(*args))
